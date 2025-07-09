@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Image Gallery</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 30px 0;
+            color: #ffffff;
+        }
+
+        /* Filter Buttons */
+        .filter-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            gap: 10px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: #333;
+            color: #ffffff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            background: #555;
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: #0078d7;
+            color: white;
+        }
+
+        /* Gallery Grid */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: #1e1e1e;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .gallery-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover .gallery-img {
+            transform: scale(1.05);
+        }
+
+        .gallery-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-caption {
+            transform: translateY(0);
+        }
+
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+
+        .lightbox-img {
+            max-width: 100%;
+            max-height: 80vh;
+            display: block;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+        }
+
+        .lightbox-caption {
+            color: #ffffff;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 1.2rem;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: color 0.2s ease;
+        }
+
+        .lightbox-close:hover {
+            color: #0078d7;
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .lightbox-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .lightbox-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: #0078d7;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            .filter-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .filter-btn {
+                width: 80%;
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dark Mode Image Gallery</h1>
+        
+        <!-- Filter Buttons -->
+        <div class="filter-buttons">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="nature">Nature</button>
+            <button class="filter-btn" data-filter="city">City</button>
+            <button class="filter-btn" data-filter="animals">Animals</button>
+        </div>
+        
+        <!-- Gallery Grid -->
+        <div class="gallery">
+            <!-- Nature Images -->
+            <div class="gallery-item" data-category="nature">
+                <img src="https://media.istockphoto.com/id/485371557/photo/twilight-at-spirit-island.jpg?s=612x612&w=0&k=20&c=FSGliJ4EKFP70Yjpzso0HfRR4WwflC6GKfl4F3Hj7fk=" alt="Mountain Landscape" class="gallery-img">
+                <div class="gallery-caption">Mountain Landscape</div>
+            </div>
+            <div class="gallery-item" data-category="nature">
+                <img src="https://miro.medium.com/v2/resize:fit:1200/0*6lQ6FxwIWeJWhti6.jpg" alt="Forest Path" class="gallery-img">
+                <div class="gallery-caption">Forest Path</div>
+            </div>
+            <div class="gallery-item" data-category="nature">
+                <img src="https://cityvillagenews.com/wp-content/uploads/2019/02/Gawk-at-8-Most-Beautiful-and-Best-Waterfalls-in-Uttar-Pradesh-This-Vacation-01.png" alt="Waterfall" class="gallery-img">
+                <div class="gallery-caption">Waterfall</div>
+            </div>
+            <div class="gallery-item" data-category="nature">
+                <img src="https://cdn.pixabay.com/photo/2022/02/04/03/04/desert-6991820_1280.jpg" alt="Desert Sunset" class="gallery-img">
+                <div class="gallery-caption">Desert Sunset</div>
+            </div>
+            
+            <!-- City Images -->
+            <div class="gallery-item" data-category="city">
+                <img src="https://media-cdn.tripadvisor.com/media/attractions-splice-spp-674x446/12/4d/3e/4f.jpg" alt="New York Skyline" class="gallery-img">
+                <div class="gallery-caption">New York Skyline</div>
+            </div>
+            <div class="gallery-item" data-category="city">
+                <img src="https://media.istockphoto.com/id/517154541/photo/tokyo-japan.jpg?s=612x612&w=0&k=20&c=TPZhDXPOG8OXsQUUD5OhkfyKk0sJWhpUU98Ur9z2r_8=" alt="Tokyo Streets" class="gallery-img">
+                <div class="gallery-caption">Tokyo Streets</div>
+            </div>
+            <div class="gallery-item" data-category="city">
+                <img src="https://images.pexels.com/photos/2363/france-landmark-lights-night.jpg?cs=srgb&dl=pexels-pixabay-2363.jpg&fm=jpg" alt="Paris at Night" class="gallery-img">
+                <div class="gallery-caption">Paris at Night</div>
+            </div>
+            <div class="gallery-item" data-category="city">
+                <img src="https://res.cloudinary.com/dtljonz0f/image/upload/c_auto,ar_4:3,w_3840,g_auto/f_auto/q_auto/v1/gc-v1/london-pass/blog/london-bridge-non-editorial?_a=BAVAZGE70" alt="London Bridge" class="gallery-img">
+                <div class="gallery-caption">London Bridge</div>
+            </div>
+            
+            <!-- Animal Images -->
+            <div class="gallery-item" data-category="animals">
+                <img src="https://img.freepik.com/premium-photo/beautiful-endangered-lion-captivity-african-wildlife-bars-panthera-leo-great-animal-nature-looking-habitat_475641-1945.jpg" alt="Lion" class="gallery-img">
+                <div class="gallery-caption">Lion</div>
+            </div>
+            <div class="gallery-item" data-category="animals">
+                <img src="https://www.worldanimalprotection.org.uk/cdn-cgi/image/width=800,format=auto,fit=cover/globalassets/images/elephants/1033551-elephant.jpg" alt="Elephant" class="gallery-img">
+                <div class="gallery-caption">Elephant</div>
+            </div>
+            <div class="gallery-item" data-category="animals">
+                <img src="https://i.redd.it/q8edkm1r1bj51.jpg" alt="Eagle" class="gallery-img">
+                <div class="gallery-caption">Eagle</div>
+            </div>
+            <div class="gallery-item" data-category="animals">
+                <img src="https://images.pexels.com/photos/162256/wolf-predator-european-wolf-carnivores-162256.jpeg?cs=srgb&dl=pexels-pixabay-162256.jpg&fm=jpg" alt="Wolf" class="gallery-img">
+                <div class="gallery-caption">Wolf</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lightbox -->
+    <div class="lightbox">
+        <button class="lightbox-close">&times;</button>
+        <div class="lightbox-content">
+            <img src="" alt="" class="lightbox-img">
+            <div class="lightbox-caption"></div>
+        </div>
+        <div class="lightbox-nav">
+            <button class="lightbox-btn prev">&lt;</button>
+            <button class="lightbox-btn next">&gt;</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter functionality
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const galleryItems = document.querySelectorAll('.gallery-item');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    
+                    const filter = button.dataset.filter;
+                    
+                    // Filter items
+                    galleryItems.forEach(item => {
+                        if (filter === 'all' || item.dataset.category === filter) {
+                            item.style.display = 'block';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // Lightbox functionality
+            const lightbox = document.querySelector('.lightbox');
+            const lightboxImg = document.querySelector('.lightbox-img');
+            const lightboxCaption = document.querySelector('.lightbox-caption');
+            const lightboxClose = document.querySelector('.lightbox-close');
+            const lightboxPrev = document.querySelector('.lightbox-btn.prev');
+            const lightboxNext = document.querySelector('.lightbox-btn.next');
+            
+            let currentImageIndex = 0;
+            const images = Array.from(document.querySelectorAll('.gallery-img'));
+            const captions = Array.from(document.querySelectorAll('.gallery-caption'));
+            
+            // Open lightbox
+            galleryItems.forEach((item, index) => {
+                item.addEventListener('click', () => {
+                    currentImageIndex = index;
+                    updateLightbox();
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+            
+            // Close lightbox
+            lightboxClose.addEventListener('click', () => {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto';
+            });
+            
+            // Close when clicking outside image
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                }
+            });
+            
+            // Navigation
+            lightboxPrev.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                updateLightbox();
+            });
+            
+            lightboxNext.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentImageIndex = (currentImageIndex + 1) % images.length;
+                updateLightbox();
+            });
+            
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                if (!lightbox.classList.contains('active')) return;
+                
+                if (e.key === 'Escape') {
+                    lightbox.classList.remove('active');
+                    document.body.style.overflow = 'auto';
+                } else if (e.key === 'ArrowLeft') {
+                    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+                    updateLightbox();
+                } else if (e.key === 'ArrowRight') {
+                    currentImageIndex = (currentImageIndex + 1) % images.length;
+                    updateLightbox();
+                }
+            });
+            
+            function updateLightbox() {
+                // Only show visible images based on current filter
+                const visibleImages = [];
+                const visibleCaptions = [];
+                
+                galleryItems.forEach((item, index) => {
+                    if (item.style.display !== 'none') {
+                        visibleImages.push(images[index]);
+                        visibleCaptions.push(captions[index]);
+                    }
+                });
+                
+                // Find the adjusted index in the visible items array
+                const adjustedIndex = visibleImages.indexOf(images[currentImageIndex]);
+                const displayIndex = adjustedIndex !== -1 ? adjustedIndex : 0;
+                
+                lightboxImg.src = visibleImages[displayIndex].src;
+                lightboxImg.alt = visibleImages[displayIndex].alt;
+                lightboxCaption.textContent = visibleCaptions[displayIndex].textContent;
+                
+                // Update currentImageIndex to match the visible image
+                currentImageIndex = Array.from(images).indexOf(visibleImages[displayIndex]);
+            }
+        });
+    </script>
+</body>
+</html>
